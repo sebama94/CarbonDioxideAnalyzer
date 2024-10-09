@@ -30,3 +30,19 @@
 *.exe
 *.out
 *.app
+
+# Build directory
+build/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Binary output directory
+bin/
