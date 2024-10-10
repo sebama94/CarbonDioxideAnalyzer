@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 
@@ -7,6 +8,7 @@ class HwMachine
         virtual double getUsage() const = 0;
         virtual double getTemperature() const { return 0.0; }   
         virtual ~HwMachine() = default;
+        virtual double getPowerConsumption() const = 0;
         
         HwMachine() = default;
         HwMachine(const HwMachine&) = delete;
@@ -14,13 +16,6 @@ class HwMachine
         HwMachine(HwMachine&&) = delete;
         HwMachine& operator=(HwMachine&&) = delete;
 
-        // C++23 features
-        constexpr virtual auto getUsageAsFloat() const -> float {
-            return static_cast<float>(getUsage());
-        }
+        double computeCO2Emission() const;
 
-        [[nodiscard("Temperature value should be used")]]
-        constexpr virtual auto getTemperatureAsFloat() const -> float {
-            return static_cast<float>(getTemperature());
-        }
 };

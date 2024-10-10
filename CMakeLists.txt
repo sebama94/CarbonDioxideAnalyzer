@@ -1,19 +1,23 @@
 cmake_minimum_required(VERSION 3.12)
-project(MyProject VERSION 1.0 LANGUAGES CXX)
+project(CarbonDioxideAnalyzer VERSION 1.0 LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Add the library
+add_subdirectory(carbonDioxideAnalyzerLib)
+
 # Include directories
-include_directories(include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/carbonDioxideAnalyzerLib/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/carbonDioxideAnalyzerLib/utility)
 
-# Source files
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+# Add the executable
+add_executable(${PROJECT_NAME} main.cpp)
 
-# Add executable
-add_executable(${PROJECT_NAME} main.cpp ${SOURCES})
+# Link the library
+target_link_libraries(${PROJECT_NAME} PRIVATE CarbonDioxideAnalyzerLib)
 
 # Set output directory
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -21,4 +25,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Install target
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} 
+    RUNTIME DESTINATION bin
+)
