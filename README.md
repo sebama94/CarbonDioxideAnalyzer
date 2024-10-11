@@ -1,29 +1,65 @@
 # CO2 Analyzer for PC Resource Usage
 
-## Overview
-This project aims to create a tool that analyzes the carbon dioxide (CO2) emissions associated with the usage of CPU, RAM, and GPU in personal computers. By monitoring these hardware components, we can estimate the energy consumption and corresponding CO2 emissions, helping users understand their computer's environmental impact.
+## Project Structure
+### Core Components
 
-## Features
-- Real-time monitoring of CPU, RAM, and GPU usage
-- Estimation of power consumption based on hardware utilization
-- Calculation of CO2 emissions using regional carbon intensity data
-- User-friendly interface to display resource usage and estimated emissions
+#### HwMachine (Abstract Base Class)
+- Defines the interface for hardware components (CPU, RAM, GPU)
+- Pure virtual methods: `getUsage()`, `getTemperature()`, `getPowerConsumption()`
 
-## Getting Started
-### Prerequisites
-- CMake (version 3.12 or higher)
-- C++23 compatible compiler
+#### Concrete Classes
+- `Cpu`: Implements HwMachine for CPU-specific functionality
+- `Ram`: Implements HwMachine for RAM-specific functionality
+- `Gpu`: Implements HwMachine for GPU-specific functionality
 
-### Building the Project
+#### HwMachineFactory
+- Implements the Factory Method pattern
+- Creates instances of concrete HwMachine subclasses based on the requested type
+
+### Design Patterns
+
+#### Factory Method Pattern
+- Implemented in `HwMachineFactory`
+- Allows for flexible creation of different hardware component objects
+- Encapsulates object creation logic, making it easier to extend with new hardware types
+
+### Unit Testing
+
+#### Google Test Framework
+- Used for writing and running unit tests
+- Includes mock objects for testing hardware components in isolation
+
+#### Mock Objects
+- `MockCpu`: Mocks the Cpu class for unit testing
+- Allows for testing CPU-related functionality without actual hardware dependencies
+
+#### Test Cases
+- Usage range tests
+- Temperature range tests
+- Power consumption tests
+
+### Build System
+
+#### CMake
+- Used for cross-platform build configuration
+- Manages dependencies, compilation flags, and build targets
+
+### Getting Started
 1. Clone the repository
 2. Navigate to the project directory
-3. Run the following commands:
+3. Build the project:
    ```
-   mkdir build
-   cd build
+   mkdir build && cd build
    cmake ..
    make
    ```
+4. Run the main program:
+   ```
+   ./bin/CarbonDioxideAnalyzer
+   ```
+5. Run unit tests:
+   ```
+   ./bin/run_tests
+   ```
 
-### Running the Analyzer
-After building, you can run the analyzer using:
+This project structure allows for easy extension and maintenance of the CO2 Analyzer, with clear separation of concerns and robust testing capabilities.

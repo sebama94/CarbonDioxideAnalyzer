@@ -2,12 +2,19 @@
 
 #include "HwMachine.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 class Ram : public HwMachine
 {
 public:
     double getUsage() const override;
     double getTemperature() const override;
     double getPowerConsumption() const override;
+    long long getTotalMemory() const;
 
     // Destructor
     ~Ram() override = default;
