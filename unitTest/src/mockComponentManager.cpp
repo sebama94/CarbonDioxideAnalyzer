@@ -3,11 +3,11 @@
 
 class ComponentManagerTest : public ::testing::Test {
 protected:
-    HwMachineFactory factory;
+    ComponentManager factory;
 };
 
 TEST_F(ComponentManagerTest, CpuUsageRange) {
-    auto machine = factory.createMachine(HwMachineFactory::MachineType::CPU);
+    auto machine = factory.createMachine(ComponentManager::MachineType::CPU);
     auto cpu = dynamic_cast<Cpu*>(machine.get());
     ASSERT_NE(cpu, nullptr);
     
@@ -17,7 +17,7 @@ TEST_F(ComponentManagerTest, CpuUsageRange) {
 }
 
 TEST_F(ComponentManagerTest, CpuTemperatureRange) {
-    auto machine = factory.createMachine(HwMachineFactory::MachineType::CPU);
+    auto machine = factory.createMachine(ComponentManager::MachineType::CPU);
     auto cpu = dynamic_cast<Cpu*>(machine.get());
     ASSERT_NE(cpu, nullptr);
     
@@ -27,7 +27,7 @@ TEST_F(ComponentManagerTest, CpuTemperatureRange) {
 }
 
 TEST_F(ComponentManagerTest, CpuPowerConsumptionPositive) {
-    auto machine = factory.createMachine(HwMachineFactory::MachineType::CPU);
+    auto machine = factory.createMachine(ComponentManager::MachineType::CPU);
     auto cpu = dynamic_cast<Cpu*>(machine.get());
     ASSERT_NE(cpu, nullptr);
     
@@ -36,11 +36,9 @@ TEST_F(ComponentManagerTest, CpuPowerConsumptionPositive) {
 }
 
 TEST_F(ComponentManagerTest, CpuCO2EmissionPositive) {
-    auto machine = factory.createMachine(HwMachineFactory::MachineType::CPU);
+    auto machine = factory.createMachine(ComponentManager::MachineType::CPU);
     ASSERT_NE(machine, nullptr);
     
     double co2Emission = machine->computeCO2Emission();
     EXPECT_GT(co2Emission, 0.0);
 }
-
-

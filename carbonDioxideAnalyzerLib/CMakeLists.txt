@@ -23,9 +23,24 @@ else()
     message(WARNING "IPO is not supported: ${error}")
 endif()
 
+# Find gtkmm package
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTKMM gtkmm-4.0)
+
+if(NOT GTKMM_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        gtkmm
+        GIT_REPOSITORY https://gitlab.gnome.org/GNOME/gtkmm.git
+        GIT_TAG        master
+    )
+    FetchContent_MakeAvailable(gtkmm)
+endif()
+
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/utility)
+include_directories(${GTKMM_INCLUDE_DIRS})
 
 # Source files
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
@@ -33,6 +48,9 @@ file(GLOB_RECURSE UTILITY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/utility/*.cpp")
 
 # Create library
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${UTILITY_SOURCES})
+
+# Link against gtkmm
+target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES})
 
 # Set output directory
 if(WIN32)
@@ -80,6 +98,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utility>
     $<INSTALL_INTERFACE:include>
+    ${GTKMM_INCLUDE_DIRS}
 )
 
 # Enable testing

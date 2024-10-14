@@ -33,19 +33,15 @@ endif()
 
 # Add the libraries
 add_subdirectory(carbonDioxideAnalyzerLib)
-#add_subdirectory(carbonDioxideGuiMonitoringLib)
-
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/carbonDioxideAnalyzerLib/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/carbonDioxideAnalyzerLib/utility)
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/carbonDioxideGuiMonitoringLib/include)
 
 # Add the executable
 add_executable(${PROJECT_NAME} main.cpp)
 
 # Link the libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE CarbonDioxideAnalyzerLib)
-#target_link_libraries(${PROJECT_NAME} PRIVATE CarbonDioxideGuiMonitoringLib)
 
 # Set output directory
 if(WIN32)

@@ -1,22 +1,24 @@
 #include <iostream>
 #include "ComponentManager.hpp"
 #include <memory>
-
-// Assuming Cpu is defined in HwMachine.hpp or another included file
-// If Cpu is in a namespace, use the correct namespace
+#include <thread>
+#include <chrono>
 
 int main() 
 {
+    auto componentManager = std::make_unique<ComponentManager>();
+    
+    // Create a thread for updating GUI data periodically
+    std::jthread updateThread([&componentManager](std::stop_token stoken) {
+        while (!stoken.stop_requested()) {
+            componentManager->updateGuiData();
+            // Add a small delay to avoid excessive updates
+            std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+        }
+    });
 
-    auto cpu = HwMachineFactory::createMachine(HwMachineFactory::MachineType::CPU);
-    auto ram = HwMachineFactory::createMachine(HwMachineFactory::MachineType::RAM);
-
-    //auto cpu_usage = cpu->getUsage();
-    //auto cpu_temp = cpu->getTemperature();
-
-    //std::cout << "CPU Temperature: " << cpu_temp << " °C" << std::endl;
+    // Run the GUI (Note: This will block until the GUI window is closed)
+    componentManager->runAll();
     
     return 0;
 }
-
-
