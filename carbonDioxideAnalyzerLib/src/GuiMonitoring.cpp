@@ -1,12 +1,16 @@
 #include "GuiMonitoring.hpp"
 #include <iostream>
-#include <cstddef> // Add this line to include the definition of size_t
+#include <cstddef>
+#include <memory>
+#include <vector>
+#include <algorithm>
+#include "Units.hpp"
 
 GuiMonitoring::GuiMonitoring() {
     std::cout << "Debug: GuiMonitoring constructor called" << std::endl;
-    app = Gtk::Application::create("org.gtkmm.example");
-    createWindow();
+    _app = Gtk::Application::create("org.gtkmm.example");
     createPlot();
+    createWindow();
 }
 
 GuiMonitoring::~GuiMonitoring() {
@@ -15,32 +19,40 @@ GuiMonitoring::~GuiMonitoring() {
 
 void GuiMonitoring::runGui() {
     std::cout << "Debug: GuiMonitoring::run() called" << std::endl;
-    // Here we pass the command line arguments
-    app->run();
+    _app->run();
 }
 
-void GuiMonitoring::updateData(const std::vector<double>& data) {
-    std::cout << "Debug: GuiMonitoring::updateData() called with " << data.size() << " elements" << std::endl;
-    plotData = data;
-    if (plotArea) {
-        plotArea->queue_draw(); // Schedule a redraw of the plot area
+void GuiMonitoring::updateData(const AllComponentData& data) {
+    _allComponentData = data;
+    _plotData.push_back(data.cpuData.usage);
+    if (_plotData.size() > 100) {  // Keep only the last 100 data points
+        _plotData.erase(_plotData.begin());
+    }
+    if (_plotArea) {
+        std::cout << "Debug: _plotArea is valid" << std::endl;
+        std::cout << "  Plot data size: " << _plotData.size() << std::endl;
+        _plotArea->queue_draw(); // Schedule a redraw of the plot area
     }
 }
 
 void GuiMonitoring::createWindow() {
     std::cout << "Debug: GuiMonitoring::createWindow() called" << std::endl;
-    window = std::make_unique<Gtk::Window>();
-    window->set_title("CO2 Analyzer");
-    window->set_default_size(800, 600);
-    // window->set_child(*plotArea); // Set the plot area as child of the window
-    window->show(); // Show the window
+    _window = std::make_unique<Gtk::Window>();
+    _window->set_title("CO2 Analyzer");
+    _window->set_default_size(1200, 800);
+    _window->set_child(*_plotArea);
+    _window->show();
 }
 
 void GuiMonitoring::createPlot() {
     std::cout << "Debug: GuiMonitoring::createPlot() called" << std::endl;
-    plotArea = std::make_unique<Gtk::DrawingArea>();
-    plotArea->set_draw_func(sigc::mem_fun(*this, &GuiMonitoring::onDrawPlot));
-    // Note: The plotArea should be set in createWindow after it is created
+    _plotArea = std::make_unique<Gtk::DrawingArea>();
+    _plotArea->set_draw_func(sigc::mem_fun(*this, &GuiMonitoring::onDrawPlot));
+    _plotArea->set_content_width(200);
+    _plotArea->set_content_height(200);
+    _plotArea->add_css_class("grid");
+    // Pack the plot area into the main box layout
+    _plotArea->show();  // Show plot area   
 }
 
 void GuiMonitoring::onDrawPlot(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
@@ -51,20 +63,20 @@ void GuiMonitoring::onDrawPlot(const Cairo::RefPtr<Cairo::Context>& cr, int widt
     cr->paint();
 
     // Draw plot if there's data
-    if (!plotData.empty()) {
-        std::cout << "Debug: Drawing plot with " << plotData.size() << " data points" << std::endl;
+    if (!_plotData.empty()) {
+        std::cout << "Debug: Drawing plot with " << _plotData.size() << " data points" << std::endl;
         cr->set_source_rgb(0.0, 0.0, 1.0);
         cr->set_line_width(2.0);
 
-        double x_scale = static_cast<double>(width) / (plotData.size() - 1);
-        double y_scale = height / (*std::max_element(plotData.begin(), plotData.end()));
+        double x_scale = static_cast<double>(width) / (_plotData.size() - 1);
+        double y_scale = height / 100.0;  // Assuming usage is a percentage (0-100)
 
-        std::size_t dataSize = plotData.size();
+        std::size_t dataSize = _plotData.size();
         if (dataSize > 0) {
-            cr->move_to(0, height - plotData[0] * y_scale);
+            cr->move_to(0, height - _plotData[0] * y_scale);
             for (std::size_t i = 1; i < dataSize; ++i) {
                 double x = i * x_scale;
-                double y = height - plotData[i] * y_scale;
+                double y = height - _plotData[i] * y_scale;
                 cr->line_to(x, y);
             }
             cr->stroke();

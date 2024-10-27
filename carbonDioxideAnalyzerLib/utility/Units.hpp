@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cmath>
+#include <vector>
+#include <chrono>
 
 class Time {
 public:
@@ -129,3 +131,25 @@ private:
 inline Energy Energy::fromPowerAndTime(const Power& power, const Time& time) {
     return Energy(power.getKW() * time.getHours());
 }
+
+struct ComponentData {
+    double usage;
+    double temperature;
+    double powerConsumption;
+    std::chrono::steady_clock::time_point timestamp;
+};
+
+using CpuData = ComponentData;
+using RamData = ComponentData;
+
+struct AllComponentData {                   
+    CpuData cpuData;
+    RamData ramData;
+    #ifdef GPU_SUPPORT
+    GpuData gpuData;
+    #endif
+};
+
+#ifdef GPU_SUPPORT
+using GpuData = ComponentData; // Ensure GpuData is always defined
+#endif
