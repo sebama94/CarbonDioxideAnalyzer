@@ -2,8 +2,8 @@
 #include <memory>
 #include <thread>
 
-#include "loggerCpp/configurationManager.hpp"
-#include "ComponentManager.hpp"
+#include "ComponentManager.hpp"  // pulls in gtkmm -> syslog.h
+#include "loggerCpp/configurationManager.hpp"  // must follow syslog headers
 
 ComponentManager::ComponentManager()
     : _cpu{std::unique_ptr<Cpu>(static_cast<Cpu*>(createMachine(MachineType::CPU).release()))}

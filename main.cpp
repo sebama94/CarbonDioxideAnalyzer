@@ -1,6 +1,10 @@
 #include <iostream>
+#include "ComponentManager.hpp"  // pulls in gtkmm -> syslog.h (LOG_INFO=6 etc.)
+
+// loggerCpp MUST be included after all headers that transitively include
+// <syslog.h>, so that utils.hpp can #undef the integer LOG_* names and
+// replace them with our function-like macros.
 #include "loggerCpp/configurationManager.hpp"
-#include "ComponentManager.hpp"
 
 int main()
 {
