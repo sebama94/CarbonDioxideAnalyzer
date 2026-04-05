@@ -7,7 +7,7 @@ int main()
     // ── Logger setup ────────────────────────────────────────────────────
     ConfigurationManager logConfig;
     logConfig.applyConsoleSink(utils::LogLevel::DEBUG);
-    logConfig.applyFileSink(utils::LogLevel::INFO, "co2analyzer.log");
+    logConfig.applyFileSink("co2analyzer.log", utils::LogLevel::INFO);
     // ────────────────────────────────────────────────────────────────────
 
     LOG_INFO("CO2 Analyzer starting up");
