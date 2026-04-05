@@ -1,6 +1,7 @@
 #include "GuiMonitoring.hpp"
 #include "loggerCpp/configurationManager.hpp"
 #include <cmath>
+#include "loggerCpp/logMacros.hpp"  // must be last: re-undefs syslog integers, restores our macros
 #include <iomanip>
 #include <sstream>
 

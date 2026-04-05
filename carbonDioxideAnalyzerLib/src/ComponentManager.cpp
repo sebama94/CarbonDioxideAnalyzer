@@ -3,7 +3,8 @@
 #include <thread>
 
 #include "ComponentManager.hpp"  // pulls in gtkmm -> syslog.h
-#include "loggerCpp/configurationManager.hpp"  // must follow syslog headers
+#include "loggerCpp/configurationManager.hpp"
+#include "loggerCpp/logMacros.hpp"  // must be last: re-undefs syslog integers, restores our macros
 
 ComponentManager::ComponentManager()
     : _cpu{std::unique_ptr<Cpu>(static_cast<Cpu*>(createMachine(MachineType::CPU).release()))}
