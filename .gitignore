@@ -1,48 +1,35 @@
-# Prerequisites
+# ── Compiled objects ────────────────────────────────────────────────────────
 *.d
+*.slo *.lo *.o *.obj
+*.gch *.pch
+*.so *.dylib *.dll
+*.lai *.la *.a *.lib
+*.exe *.out *.app
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build directory
+# ── Build artefacts ─────────────────────────────────────────────────────────
 build/
+bin/
+_deps/
 
-# CMake generated files
+# ── CMake generated files ────────────────────────────────────────────────────
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
+install_manifest.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+compile_commands.json
 
-# IDE-specific files
+# ── Ninja ────────────────────────────────────────────────────────────────────
+.ninja_deps
+.ninja_log
+
+# ── Application logs ─────────────────────────────────────────────────────────
+*.log
+
+# ── IDE / OS ─────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
-
-# Binary output directory
-bin/
+.DS_Store
+Thumbs.db

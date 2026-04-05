@@ -11,31 +11,26 @@
 class Cpu : public HwMachine
 {
 public:
-    double getUsage() const override;
-    double getTemperature() const override;
-    double getPowerConsumption() const override;
-
-    // Destructor
-    ~Cpu() override = default;
-
-    // Default constructor
     Cpu() = default;
-
-    // Delete copy and move operations
+    ~Cpu() override = default;
     Cpu(const Cpu&) = delete;
     Cpu& operator=(const Cpu&) = delete;
     Cpu(Cpu&&) = delete;
     Cpu& operator=(Cpu&&) = delete;
 
+    double getUsage() const override;
+    double getTemperature() const override;
+    double getPowerConsumption() const override;
+
 private:
 #ifdef _WIN32
-    mutable FILETIME idleTime;
-    mutable FILETIME kernelTime;
-    mutable FILETIME userTime;
+    mutable FILETIME idleTime{};
+    mutable FILETIME kernelTime{};
+    mutable FILETIME userTime{};
 #else
-    mutable unsigned long long lastTotalUser;
-    mutable unsigned long long lastTotalUserLow;
-    mutable unsigned long long lastTotalSys;
-    mutable unsigned long long lastTotalIdle;
+    mutable unsigned long long lastTotalUser{0};
+    mutable unsigned long long lastTotalUserLow{0};
+    mutable unsigned long long lastTotalSys{0};
+    mutable unsigned long long lastTotalIdle{0};
 #endif
 };

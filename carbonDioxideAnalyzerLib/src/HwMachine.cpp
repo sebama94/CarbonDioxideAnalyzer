@@ -2,16 +2,13 @@
 
 double HwMachine::computeCO2Emission() const
 {
-    // This is a simplified calculation and should be adjusted based on actual CO2 emission factors
-    // and more complex relationships between hardware usage, temperature, and CO2 emissions.
-    const double usageFactor = 0.5;  // CO2 emission factor for usage (example value)
-    const double temperatureFactor = 0.3;  // CO2 emission factor for temperature (example value)
+    // CO2 emission rate in gCO2/hour:
+    //   power (W) × 0.001 (kW/W) × carbon_intensity (gCO2/kWh)
+    //
+    // Carbon intensity: world average ~450 gCO2/kWh (IEA 2023).
+    // Override this constant per-region for more accurate results.
+    static constexpr double CARBON_INTENSITY_G_PER_KWH = 450.0;
+    static constexpr double W_TO_KW = 0.001;
 
-    double usage = getUsage();
-    double temperature = getTemperature();
-
-    // Calculate CO2 emission based on usage and temperature
-    double emission = (usage * usageFactor) + (temperature * temperatureFactor);
-
-    return emission;
+    return getPowerConsumption() * W_TO_KW * CARBON_INTENSITY_G_PER_KWH;
 }

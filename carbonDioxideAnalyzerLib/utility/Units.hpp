@@ -142,14 +142,14 @@ struct ComponentData {
 using CpuData = ComponentData;
 using RamData = ComponentData;
 
-struct AllComponentData {                   
+#ifdef GPU_SUPPORT
+using GpuData = ComponentData;
+#endif
+
+struct AllComponentData {
     CpuData cpuData;
     RamData ramData;
     #ifdef GPU_SUPPORT
     GpuData gpuData;
     #endif
 };
-
-#ifdef GPU_SUPPORT
-using GpuData = ComponentData; // Ensure GpuData is always defined
-#endif

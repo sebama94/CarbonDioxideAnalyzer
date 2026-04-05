@@ -1,0 +1,4 @@
+[submodule "third_party/loggerCpp"]
+	path = third_party/loggerCpp
+	url = https://github.com/sebama94/loggerCpp.git
+	branch = develop

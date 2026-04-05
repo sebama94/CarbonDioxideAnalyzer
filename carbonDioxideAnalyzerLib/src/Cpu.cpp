@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 #include <numeric>
-#include <ranges>
-#include <algorithm>
+#include <chrono>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -16,7 +15,7 @@
 #include <sys/sysinfo.h>
 #endif
 
-double Cpu::getUsage() const 
+double Cpu::getUsage() const
 {
 #ifdef _WIN32
     static PDH_HQUERY cpuQuery;
@@ -31,7 +30,6 @@ double Cpu::getUsage() const
     }
 
     PDH_FMT_COUNTERVALUE counterVal;
-
     PdhCollectQueryData(cpuQuery);
     PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
     return counterVal.doubleValue;
@@ -40,56 +38,47 @@ double Cpu::getUsage() const
     std::string line;
     std::getline(file, line);
     std::istringstream iss(line);
-    
+
     std::vector<unsigned long long> values;
     unsigned long long value;
-    iss.ignore(std::numeric_limits<std::streamsize>::max(), ' '); // Skip the first token (cpu label)
+    iss.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
     while (iss >> value) {
         values.push_back(value);
     }
 
-    if (values.size() < 4) {
-        return 0.0; // Return 0 if we don't have enough data
-    }
+    if (values.size() < 4) return 0.0;
 
-    unsigned long long idle = values[3];
+    unsigned long long idle  = values[3];
     unsigned long long total = std::accumulate(values.begin(), values.end(), 0ULL);
 
-    // Calculate the differences
     unsigned long long totalDiff = total - (lastTotalUser + lastTotalUserLow + lastTotalSys + lastTotalIdle);
-    unsigned long long idleDiff = idle - lastTotalIdle;
+    unsigned long long idleDiff  = idle  - lastTotalIdle;
 
-    // Update the last recorded values
-    lastTotalUser = values[0];
+    lastTotalUser    = values[0];
     lastTotalUserLow = values[1];
-    lastTotalSys = values[2];
-    lastTotalIdle = idle;
+    lastTotalSys     = values[2];
+    lastTotalIdle    = idle;
 
-    // Calculate and return the CPU usage
     return totalDiff > 0 ? (100.0 * (totalDiff - idleDiff) / totalDiff) : 0.0;
 #endif
 }
 
-double Cpu::getTemperature() const 
+double Cpu::getTemperature() const
 {
 #ifdef _WIN32
-    // Windows implementation
     HKEY hKey;
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                     L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+                     0, KEY_READ, &hKey) != ERROR_SUCCESS) {
         return 0.0;
     }
-    
-    DWORD temperature;
+    DWORD temperature = 0;
     DWORD size = sizeof(DWORD);
-    if (RegQueryValueEx(hKey, L"~Temperature", NULL, NULL, reinterpret_cast<LPBYTE>(&temperature), &size) != ERROR_SUCCESS) {
-        RegCloseKey(hKey);
-        return 0.0;
-    }
-    
+    RegQueryValueEx(hKey, L"~Temperature", NULL, NULL,
+                    reinterpret_cast<LPBYTE>(&temperature), &size);
     RegCloseKey(hKey);
-    return static_cast<double>(temperature - 2732) / 10.0; // Convert from deciKelvin to Celsius
+    return static_cast<double>(temperature - 2732) / 10.0;
 #else
-    // Linux implementation
     if (std::ifstream file("/sys/class/thermal/thermal_zone0/temp"); file) {
         std::string temp;
         std::getline(file, temp);
@@ -99,19 +88,45 @@ double Cpu::getTemperature() const
 #endif
 }
 
-double Cpu::getPowerConsumption() const 
+double Cpu::getPowerConsumption() const
 {
 #ifdef _WIN32
-    // Windows implementation (placeholder)
-    // Note: Getting power consumption on Windows typically requires vendor-specific tools
     return 0.0;
 #else
-    // Linux implementation
-    if (std::ifstream file("/sys/class/power_supply/BAT0/power_now"); file) {
-        std::string power;
-        std::getline(file, power);
-        return std::stod(power) / 1000000.0; // Convert microwatts to watts
+    // 1. Try Intel RAPL (works on desktops and laptops with Intel/AMD CPUs).
+    //    Reads energy counter and computes average power since last call.
+    {
+        static unsigned long long lastEnergy = 0;
+        static auto lastTime = std::chrono::steady_clock::now();
+
+        std::ifstream rapl("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj");
+        if (rapl) {
+            unsigned long long energy = 0;
+            rapl >> energy;
+
+            auto now     = std::chrono::steady_clock::now();
+            double elapsed = std::chrono::duration<double>(now - lastTime).count();
+            double power   = 0.0;
+
+            if (lastEnergy > 0 && elapsed > 0.0) {
+                // energy_uj wraps at max_energy_range_uj; ignore wrap-around samples
+                if (energy >= lastEnergy) {
+                    power = static_cast<double>(energy - lastEnergy) * 1e-6 / elapsed;
+                }
+            }
+            lastEnergy = energy;
+            lastTime   = now;
+            return power;
+        }
     }
+
+    // 2. Fallback: battery power_now (laptops on battery).
+    if (std::ifstream bat("/sys/class/power_supply/BAT0/power_now"); bat) {
+        unsigned long long uW = 0;
+        bat >> uW;
+        return static_cast<double>(uW) * 1e-6;
+    }
+
     return 0.0;
 #endif
 }
